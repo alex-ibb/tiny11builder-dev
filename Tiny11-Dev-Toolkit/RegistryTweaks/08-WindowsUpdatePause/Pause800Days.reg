@@ -1,0 +1,13 @@
+Windows Registry Editor Version 5.00
+
+; 暂停 Windows Update 800 天
+; Pause Windows Update for 800 days
+; 注意: 日期基于运行此文件时的系统时间计算
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings]
+"PauseFeatureUpdatesStartTime"="2026-01-17T00:00:00Z"
+"PauseFeatureUpdatesEndTime"="2028-03-28T00:00:00Z"
+"PauseQualityUpdatesStartTime"="2026-01-17T00:00:00Z"
+"PauseQualityUpdatesEndTime"="2028-03-28T00:00:00Z"
+"PauseUpdatesStartTime"="2026-01-17T00:00:00Z"
+"PauseUpdatesExpiryTime"="2028-03-28T00:00:00Z"
