@@ -1,0 +1,17 @@
+Windows Registry Editor Version 5.00
+
+; 添加 "CMD here" 右键菜单
+; Add "CMD here" context menu
+[HKEY_CLASSES_ROOT\Directory\Background\shell\cmdhere]
+@="CMD here"
+"Icon"="cmd.exe"
+
+[HKEY_CLASSES_ROOT\Directory\Background\shell\cmdhere\command]
+@="cmd.exe /s /k pushd \"%V\""
+
+[HKEY_CLASSES_ROOT\Directory\shell\cmdhere]
+@="CMD here"
+"Icon"="cmd.exe"
+
+[HKEY_CLASSES_ROOT\Directory\shell\cmdhere\command]
+@="cmd.exe /s /k pushd \"%V\""

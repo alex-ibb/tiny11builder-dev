@@ -1,0 +1,11 @@
+Windows Registry Editor Version 5.00
+
+; 恢复 Windows Update (取消暂停)
+; Resume Windows Update (remove pause)
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings]
+"PauseFeatureUpdatesStartTime"=-
+"PauseFeatureUpdatesEndTime"=-
+"PauseQualityUpdatesStartTime"=-
+"PauseQualityUpdatesEndTime"=-
+"PauseUpdatesStartTime"=-
+"PauseUpdatesExpiryTime"=-

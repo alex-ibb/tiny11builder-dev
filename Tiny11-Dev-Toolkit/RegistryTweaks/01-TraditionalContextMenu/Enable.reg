@@ -1,0 +1,6 @@
+Windows Registry Editor Version 5.00
+
+; 启用传统右键菜单 (Windows 10 风格)
+; Enable Traditional Context Menu (Windows 10 style)
+[HKEY_CURRENT_USER\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32]
+@=""

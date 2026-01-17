@@ -1,0 +1,14 @@
+Windows Registry Editor Version 5.00
+
+; 文件资源管理器 - 开发者模式配置
+; File Explorer - Developer Mode Configuration
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced]
+"Hidden"=dword:00000001
+"HideFileExt"=dword:00000000
+"ShowSecondsInSystemClock"=dword:00000001
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer]
+"FolderContentsInfoTip"=dword:00000001
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\Shell\BagMRU Size]
+@=dword:000027f6

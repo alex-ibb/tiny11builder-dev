@@ -1,0 +1,19 @@
+Windows Registry Editor Version 5.00
+
+; 添加 "PowerShell here (Admin)" 右键菜单
+; Add "PowerShell here (Admin)" context menu
+[HKEY_CLASSES_ROOT\Directory\Background\shell\psadmin]
+@="PowerShell here (Admin)"
+"Icon"="powershell.exe"
+"HasLUAShield"=""
+
+[HKEY_CLASSES_ROOT\Directory\Background\shell\psadmin\command]
+@="powershell.exe -Command \"Start-Process powershell -Verb RunAs -ArgumentList '-NoExit -Command Set-Location -LiteralPath ''%V'''\""
+
+[HKEY_CLASSES_ROOT\Directory\shell\psadmin]
+@="PowerShell here (Admin)"
+"Icon"="powershell.exe"
+"HasLUAShield"=""
+
+[HKEY_CLASSES_ROOT\Directory\shell\psadmin\command]
+@="powershell.exe -Command \"Start-Process powershell -Verb RunAs -ArgumentList '-NoExit -Command Set-Location -LiteralPath ''%V'''\""

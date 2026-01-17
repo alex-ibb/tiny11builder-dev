@@ -1,0 +1,6 @@
+Windows Registry Editor Version 5.00
+
+; 显示任务栏搜索框
+; Show Taskbar Search Box
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Search]
+"SearchboxTaskbarMode"=dword:00000002

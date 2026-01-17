@@ -1,0 +1,12 @@
+Windows Registry Editor Version 5.00
+
+; Edge 浏览器优化
+; Edge Browser Optimization
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge]
+"NewTabPageContentEnabled"=dword:00000000
+"NewTabPageQuickLinksEnabled"=dword:00000000
+"HubsSidebarEnabled"=dword:00000000
+"HideFirstRunExperience"=dword:00000001
+"EdgeShoppingAssistantEnabled"=dword:00000000
+"EdgeCollectionsEnabled"=dword:00000000
+"EdgeFollowEnabled"=dword:00000000

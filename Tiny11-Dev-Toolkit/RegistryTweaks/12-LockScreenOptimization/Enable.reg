@@ -1,0 +1,14 @@
+Windows Registry Editor Version 5.00
+
+; 启用锁屏内容 (聚焦/天气/新闻)
+; Enable Lock Screen content (Spotlight/Weather/News)
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager]
+"RotatingLockScreenEnabled"=dword:00000001
+"RotatingLockScreenOverlayEnabled"=dword:00000001
+"SubscribedContent-338387Enabled"=dword:00000001
+"SubscribedContent-338388Enabled"=dword:00000001
+"SubscribedContent-338389Enabled"=dword:00000001
+"SubscribedContent-353696Enabled"=dword:00000001
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced]
+"Start_IrisRecommendations"=dword:00000001

@@ -1,0 +1,6 @@
+Windows Registry Editor Version 5.00
+
+; 任务栏居中对齐 (Windows 11 默认)
+; Taskbar Center Alignment (Windows 11 Default)
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced]
+"TaskbarAl"=dword:00000001

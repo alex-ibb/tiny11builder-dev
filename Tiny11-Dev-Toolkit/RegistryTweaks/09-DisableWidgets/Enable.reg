@@ -1,0 +1,9 @@
+Windows Registry Editor Version 5.00
+
+; 启用 Widgets (新闻和兴趣)
+; Enable Widgets (News and Interests)
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Dsh]
+"AllowNewsAndInterests"=dword:00000001
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced]
+"TaskbarDa"=dword:00000001

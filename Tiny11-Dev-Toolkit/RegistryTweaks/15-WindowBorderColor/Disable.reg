@@ -1,0 +1,6 @@
+Windows Registry Editor Version 5.00
+
+; 禁用窗口边框颜色 (使用默认白色/黑色标题栏)
+; Disable Window Border Color (use default white/black title bars)
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\DWM]
+"ColorPrevalence"=dword:00000000

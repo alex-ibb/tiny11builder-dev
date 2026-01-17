@@ -1,0 +1,7 @@
+Windows Registry Editor Version 5.00
+
+; 启用窗口边框颜色 (在标题栏显示主题色)
+; Enable Window Border Color (show accent color on title bars)
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\DWM]
+"ColorPrevalence"=dword:00000001
+"Composition"=dword:00000001

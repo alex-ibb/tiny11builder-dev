@@ -1,0 +1,17 @@
+Windows Registry Editor Version 5.00
+
+; 添加 "PowerShell here" 右键菜单
+; Add "PowerShell here" context menu
+[HKEY_CLASSES_ROOT\Directory\Background\shell\pshere]
+@="PowerShell here"
+"Icon"="powershell.exe"
+
+[HKEY_CLASSES_ROOT\Directory\Background\shell\pshere\command]
+@="powershell.exe -NoExit -Command \"Set-Location -LiteralPath '%V'\""
+
+[HKEY_CLASSES_ROOT\Directory\shell\pshere]
+@="PowerShell here"
+"Icon"="powershell.exe"
+
+[HKEY_CLASSES_ROOT\Directory\shell\pshere\command]
+@="powershell.exe -NoExit -Command \"Set-Location -LiteralPath '%V'\""

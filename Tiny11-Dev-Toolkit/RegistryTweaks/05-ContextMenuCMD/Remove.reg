@@ -1,0 +1,6 @@
+Windows Registry Editor Version 5.00
+
+; 移除 "CMD here" 右键菜单
+; Remove "CMD here" context menu
+[-HKEY_CLASSES_ROOT\Directory\Background\shell\cmdhere]
+[-HKEY_CLASSES_ROOT\Directory\shell\cmdhere]

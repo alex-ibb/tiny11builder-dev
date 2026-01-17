@@ -1,0 +1,6 @@
+Windows Registry Editor Version 5.00
+
+; 启用搜索突出显示 (动态搜索内容)
+; Enable Search Highlights (dynamic search content)
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\SearchSettings]
+"IsDynamicSearchBoxEnabled"=dword:00000001
