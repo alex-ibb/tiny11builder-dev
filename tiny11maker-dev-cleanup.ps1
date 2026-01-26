@@ -46,7 +46,7 @@ Write-Host "Scanning for residual state..." -ForegroundColor Yellow
 Write-Host ""
 
 # Check for loaded registry hives
-$hives = @('zCOMPONENTS', 'zDEFAULT', 'zNTUSER', 'zSOFTWARE', 'zSYSTEM')
+$hives = @('zCOMPONENTS', 'zDEFAULT', 'zNTUSER', 'zSOFTWARE', 'zSYSTEM', 'zUSRCLASS')
 $loadedHives = @()
 foreach ($hive in $hives) {
     $result = reg query "HKLM\$hive" 2>&1

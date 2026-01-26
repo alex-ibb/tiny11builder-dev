@@ -332,6 +332,8 @@ reg load HKLM\zDEFAULT $ScratchDisk\scratchdir\Windows\System32\config\default |
 reg load HKLM\zNTUSER $ScratchDisk\scratchdir\Users\Default\ntuser.dat | Out-Null
 reg load HKLM\zSOFTWARE $ScratchDisk\scratchdir\Windows\System32\config\SOFTWARE | Out-Null
 reg load HKLM\zSYSTEM $ScratchDisk\scratchdir\Windows\System32\config\SYSTEM | Out-Null
+# Load UsrClass.dat for HKCU\Software\Classes settings (context menu, etc.)
+reg load HKLM\zUSRCLASS "$ScratchDisk\scratchdir\Users\Default\AppData\Local\Microsoft\Windows\UsrClass.dat" | Out-Null
 Write-Host "Bypassing system requirements(on the system image):"
 & 'reg' 'add' 'HKLM\zDEFAULT\Control Panel\UnsupportedHardwareNotificationCache' '/v' 'SV1' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
 & 'reg' 'add' 'HKLM\zDEFAULT\Control Panel\UnsupportedHardwareNotificationCache' '/v' 'SV2' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
@@ -477,8 +479,11 @@ Write-Host "Configuring File Explorer default view (Details, no grouping)..."
 # Set taskbar alignment to left (0=left, 1=center)
 & 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' '/v' 'TaskbarAl' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
 
+# Combine taskbar buttons when taskbar is full (TaskbarGlomLevel: 0=always, 1=when full, 2=never)
+& 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' '/v' 'TaskbarGlomLevel' '/t' 'REG_DWORD' '/d' '1' '/f' | Out-Null
+
 Write-Host "File Explorer configured: Details view, no grouping, show hidden files, show file extensions, taskbar clock shows seconds!"
-Write-Host "Taskbar configured: Search hidden, left-aligned!"
+Write-Host "Taskbar configured: Search hidden, left-aligned, combine when full!"
 
 Write-Host "Disabling Sponsored Apps:"
 & 'reg' 'add' 'HKLM\zNTUSER\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' '/v' 'OemPreInstalledAppsEnabled' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
@@ -703,6 +708,37 @@ Write-Host "Disabling Xbox background services..."
 Write-Host "Xbox services disabled!"
 
 # ============================================================================
+# Dev Edition: Disable additional unnecessary services
+# ============================================================================
+Write-Host "Disabling additional unnecessary services..."
+
+# Fax - rarely used in modern environments
+& 'reg' 'add' 'HKLM\zSYSTEM\ControlSet001\Services\Fax' '/v' 'Start' '/t' 'REG_DWORD' '/d' '4' '/f' | Out-Null
+
+# Remote Registry - security risk, allows remote registry modification
+& 'reg' 'add' 'HKLM\zSYSTEM\ControlSet001\Services\RemoteRegistry' '/v' 'Start' '/t' 'REG_DWORD' '/d' '4' '/f' | Out-Null
+
+# Geolocation Service - desktop dev machine doesn't need location
+& 'reg' 'add' 'HKLM\zSYSTEM\ControlSet001\Services\lfsvc' '/v' 'Start' '/t' 'REG_DWORD' '/d' '4' '/f' | Out-Null
+
+# Retail Demo Service - only for store demos
+& 'reg' 'add' 'HKLM\zSYSTEM\ControlSet001\Services\RetailDemo' '/v' 'Start' '/t' 'REG_DWORD' '/d' '4' '/f' | Out-Null
+
+# Connected User Experiences and Telemetry (DiagTrack) - main telemetry service
+& 'reg' 'add' 'HKLM\zSYSTEM\ControlSet001\Services\DiagTrack' '/v' 'Start' '/t' 'REG_DWORD' '/d' '4' '/f' | Out-Null
+
+# Diagnostic Policy Service - problem detection (sends data to Microsoft)
+& 'reg' 'add' 'HKLM\zSYSTEM\ControlSet001\Services\DPS' '/v' 'Start' '/t' 'REG_DWORD' '/d' '4' '/f' | Out-Null
+
+# Diagnostic Service Host - diagnostic components host
+& 'reg' 'add' 'HKLM\zSYSTEM\ControlSet001\Services\WdiServiceHost' '/v' 'Start' '/t' 'REG_DWORD' '/d' '4' '/f' | Out-Null
+
+# Diagnostic System Host - system diagnostic host
+& 'reg' 'add' 'HKLM\zSYSTEM\ControlSet001\Services\WdiSystemHost' '/v' 'Start' '/t' 'REG_DWORD' '/d' '4' '/f' | Out-Null
+
+Write-Host "Additional services disabled (Fax, RemoteRegistry, Geolocation, RetailDemo, Telemetry, Diagnostics)!"
+
+# ============================================================================
 # Dev Edition: Set Windows Search to Manual (recommend Everything)
 # ============================================================================
 Write-Host "Setting Windows Search service to Manual start..."
@@ -757,10 +793,11 @@ Write-Host "Edge browser configured: News feed disabled, clean new tab page!"
 
 # ============================================================================
 # Dev Edition: Force Windows 11 to use traditional context menu
-# Note: Must use NTUSER (per-user) path, not SOFTWARE (system-wide)
+# Note: HKCU\Software\Classes is stored in UsrClass.dat, not ntuser.dat
+#       So we write to zUSRCLASS (which is UsrClass.dat loaded as a hive)
 # ============================================================================
 Write-Host "Enabling traditional (Windows 10 style) context menu..."
-& 'reg' 'add' 'HKLM\zNTUSER\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32' '/ve' '/t' 'REG_SZ' '/d' '' '/f' | Out-Null
+& 'reg' 'add' 'HKLM\zUSRCLASS\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32' '/ve' '/t' 'REG_SZ' '/d' '' '/f' | Out-Null
 Write-Host "Traditional context menu enabled!"
 
 # ============================================================================
@@ -953,7 +990,7 @@ Write-Host "Unmounting Registry..."
 Start-Sleep -Seconds 2
 
 # Unload registry hives with retry logic
-$hives = @('zCOMPONENTS', 'zDEFAULT', 'zNTUSER', 'zSOFTWARE', 'zSYSTEM')
+$hives = @('zCOMPONENTS', 'zDEFAULT', 'zNTUSER', 'zSOFTWARE', 'zSYSTEM', 'zUSRCLASS')
 foreach ($hive in $hives) {
     $retryCount = 0
     $maxRetries = 3
