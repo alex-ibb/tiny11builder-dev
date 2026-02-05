@@ -5,7 +5,8 @@
 
 if (-not $ScratchDisk) {
     $ScratchDisk = $PSScriptRoot -replace '[\\]+$', ''
-} else {
+}
+else {
     $ScratchDisk = $ScratchDisk + ":"
 }
 
@@ -17,7 +18,8 @@ if ((Get-ExecutionPolicy) -eq 'Restricted') {
     $response = Read-Host
     if ($response -eq 'yes') {
         Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Confirm:$false
-    } else {
+    }
+    else {
         Write-Host "The script cannot be run without changing the execution policy. Exiting..."
         exit
     }
@@ -26,11 +28,10 @@ if ((Get-ExecutionPolicy) -eq 'Restricted') {
 # Check and run the script as admin if required
 $adminSID = New-Object System.Security.Principal.SecurityIdentifier("S-1-5-32-544")
 $adminGroup = $adminSID.Translate([System.Security.Principal.NTAccount])
-$myWindowsID=[System.Security.Principal.WindowsIdentity]::GetCurrent()
-$myWindowsPrincipal=new-object System.Security.Principal.WindowsPrincipal($myWindowsID)
-$adminRole=[System.Security.Principal.WindowsBuiltInRole]::Administrator
-if (! $myWindowsPrincipal.IsInRole($adminRole))
-{
+$myWindowsID = [System.Security.Principal.WindowsIdentity]::GetCurrent()
+$myWindowsPrincipal = new-object System.Security.Principal.WindowsPrincipal($myWindowsID)
+$adminRole = [System.Security.Principal.WindowsBuiltInRole]::Administrator
+if (! $myWindowsPrincipal.IsInRole($adminRole)) {
     Write-Host "Restarting Tiny11 image creator as admin in a new window, you can close this one."
     $newProcess = new-object System.Diagnostics.ProcessStartInfo "PowerShell";
     $newProcess.Arguments = $myInvocation.MyCommand.Definition;
@@ -53,11 +54,11 @@ Write-Host "  - Snipping Tool (Screenshots)"
 Write-Host "  - Windows Update & Online Driver Installation"
 Write-Host ""
 Write-Host "Additional features:"
-Write-Host "  - Best performance mode with 5 visual effects:"
-Write-Host "    (Font smoothing, window shadow, menu fade, cursor shadow, icon label shadow)"
+Write-Host "  - Best performance mode with 3 visual effects:"
+Write-Host "    (Font smoothing, window shadow, cursor shadow)"
 Write-Host "  - File Explorer: Details view by default, no grouping"
 Write-Host "  - Show hidden files and file extensions"
-Write-Host "  - Windows Update: DISABLED by default (enable via desktop scripts)"
+Write-Host "  - Windows Update: Paused 800 days from build date (resume via Toolkit)"
 Write-Host "  - Online driver installation: Enabled"
 Write-Host "  - Microsoft PC Manager removed"
 Write-Host "  - Extended Wallpapers removed (saves ~300-500MB)"
@@ -69,7 +70,7 @@ Write-Host "  - Xbox background services disabled"
 Write-Host "  - Windows Search set to Manual (recommend Everything)"
 Write-Host "  - Lock Screen: Spotlight/news/tips disabled"
 Write-Host "  - Edge: News feed disabled, clean new tab page"
-Write-Host "  - README file placed on desktop"
+Write-Host "  - Tiny11-Dev-Toolkit placed on desktop (includes all config scripts)"
 Write-Host "============================================================================"
 Write-Host ""
 
@@ -121,7 +122,8 @@ if ($loadedHives.Count -gt 0 -or $hasScratch -or $hasTiny11) {
         reg unload "HKLM\$hive" 2>&1 | Out-Null
         if ($LASTEXITCODE -eq 0) {
             Write-Host " OK" -ForegroundColor Green
-        } else {
+        }
+        else {
             Start-Sleep -Seconds 2
             reg unload "HKLM\$hive" 2>&1 | Out-Null
             Write-Host " Done" -ForegroundColor Green
@@ -137,7 +139,8 @@ if ($loadedHives.Count -gt 0 -or $hasScratch -or $hasTiny11) {
                 try {
                     Dismount-WindowsImage -Path $img.MountPath -Discard -ErrorAction Stop | Out-Null
                     Write-Host " OK" -ForegroundColor Green
-                } catch {
+                }
+                catch {
                     dism /Unmount-Image /MountDir:"$($img.MountPath)" /Discard 2>&1 | Out-Null
                     Write-Host " Done" -ForegroundColor Green
                 }
@@ -160,7 +163,8 @@ if ($loadedHives.Count -gt 0 -or $hasScratch -or $hasTiny11) {
     Write-Host ""
     Write-Host "Cleanup complete! Starting fresh build..." -ForegroundColor Green
     Write-Host ""
-} else {
+}
+else {
     Write-Host "  No residual state found. Environment is clean." -ForegroundColor Green
     Write-Host ""
 }
@@ -172,7 +176,8 @@ do {
     if ($DriveLetter -match '^[c-zC-Z]$') {
         $DriveLetter = $DriveLetter + ":"
         Write-Output "Drive letter set to $DriveLetter"
-    } else {
+    }
+    else {
         Write-Output "Invalid drive letter. Please enter a letter between C and Z."
     }
 } while ($DriveLetter -notmatch '^[c-zC-Z]:$')
@@ -185,7 +190,8 @@ if ((Test-Path "$DriveLetter\sources\boot.wim") -eq $false -or (Test-Path "$Driv
         Write-Host ' '
         Write-Host 'Converting install.esd to install.wim. This may take a while...'
         Export-WindowsImage -SourceImagePath $DriveLetter\sources\install.esd -SourceIndex $index -DestinationImagePath $ScratchDisk\tiny11\sources\install.wim -Compressiontype Maximum -CheckIntegrity
-    } else {
+    }
+    else {
         Write-Host "Can't find Windows OS Installation files in the specified Drive Letter.."
         Write-Host "Please enter the correct DVD Drive Letter.."
         exit
@@ -208,7 +214,8 @@ $wimFilePath = "$ScratchDisk\tiny11\sources\install.wim"
 & icacls $wimFilePath "/grant" "$($adminGroup.Value):(F)"
 try {
     Set-ItemProperty -Path $wimFilePath -Name IsReadOnly -Value $false -ErrorAction Stop
-} catch {
+}
+catch {
     
 }
 New-Item -ItemType Directory -Force -Path "$ScratchDisk\scratchdir" > $null
@@ -220,7 +227,8 @@ $languageLine = $imageIntl -split '\n' | Where-Object { $_ -match 'Default syste
 if ($languageLine) {
     $languageCode = $Matches[1]
     Write-Host "Default system UI language code: $languageCode"
-} else {
+}
+else {
     Write-Host "Default system UI language code not found."
 }
 
@@ -229,7 +237,7 @@ $lines = $imageInfo -split '\r?\n'
 
 foreach ($line in $lines) {
     if ($line -like '*Architecture : *') {
-        $architecture = $line -replace 'Architecture : ',''
+        $architecture = $line -replace 'Architecture : ', ''
         # If the architecture is x64, replace it with amd64
         if ($architecture -eq 'x64') {
             $architecture = 'amd64'
@@ -246,11 +254,11 @@ if (-not $architecture) {
 Write-Host "Mounting complete! Performing removal of applications..."
 
 $packages = & 'dism' '/English' "/image:$($ScratchDisk)\scratchdir" '/Get-ProvisionedAppxPackages' |
-    ForEach-Object {
-        if ($_ -match 'PackageName : (.*)') {
-            $matches[1]
-        }
+ForEach-Object {
+    if ($_ -match 'PackageName : (.*)') {
+        $matches[1]
     }
+}
 
 # Dev Edition: Retained apps (NOT in this list):
 #   - Microsoft.Windows.Photos_ (Photo Viewer)
@@ -313,8 +321,8 @@ Write-Host "Removal complete!"
 # ============================================================================
 Write-Host "Removing Extended Wallpapers to save disk space..."
 $wallpaperPackages = & 'dism' '/English' "/image:$($ScratchDisk)\scratchdir" '/Get-Packages' | 
-    Select-String -Pattern 'Microsoft-Windows-Wallpaper-Content-Extended' | 
-    ForEach-Object { ($_ -split ':')[1].Trim() }
+Select-String -Pattern 'Microsoft-Windows-Wallpaper-Content-Extended' | 
+ForEach-Object { ($_ -split ':')[1].Trim() }
 
 foreach ($pkg in $wallpaperPackages) {
     if ($pkg) {
@@ -346,9 +354,9 @@ Write-Host "Bypassing system requirements(on the system image):"
 
 # ============================================================================
 # Dev Edition: Set to Best Performance with User-Selected Visual Effects
-# Based on user's screenshot selection (5 items enabled)
+# Only 3 items enabled for minimal but usable UI
 # ============================================================================
-Write-Host "Configuring visual effects (custom selection from user)..."
+Write-Host "Configuring visual effects (custom selection - 3 items)..."
 
 # Set to Custom mode (3 = Custom)
 & 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects' '/v' 'VisualFXSetting' '/t' 'REG_DWORD' '/d' '3' '/f' | Out-Null
@@ -358,30 +366,30 @@ Write-Host "Configuring visual effects (custom selection from user)..."
 # This is an 8-byte (64-bit) value controlling visual effects
 # Byte layout (little-endian): [0][1][2][3][4][5][6][7]
 #
-# User selected effects:
+# User selected effects (3 items only):
 #   [x] Smooth edges of screen fonts (FontSmoothing - separate registry key)
 #   [x] Show shadows under windows (DropShadow - Byte 0, Bit 2)
-#   [x] Fade or slide menus into view (MenuFade - Byte 0, Bit 1)
 #   [x] Show shadows under mouse pointer (CursorShadow - Byte 1, Bit 5)
-#   [x] Use drop shadows for icon labels (ListviewShadow - separate registry key)
+#   [ ] Fade or slide menus into view - DISABLED
+#   [ ] Use drop shadows for icon labels - DISABLED
 #
-# UserPreferencesMask value: 9032038010000000
-#   Byte 0 = 90: DropShadow(bit2) + MenuFade(bit1) + other bits
-#   Byte 1 = 32: CursorShadow(bit5)
-#   Byte 2 = 03: Base settings
+# UserPreferencesMask value: 9032018010000000
+#   Byte 0 = 90: DropShadow(bit2) enabled, MenuFade(bit1) disabled
+#   Byte 1 = 32: CursorShadow(bit5) enabled
+#   Byte 2 = 01: Base settings (reduced from 03)
 #   Byte 3 = 80: Base settings
 #   Bytes 4-7 = 10000000: Base settings
 # ============================================================================
 
-# Set UserPreferencesMask with user's selected effects
-& 'reg' 'add' 'HKLM\zNTUSER\Control Panel\Desktop' '/v' 'UserPreferencesMask' '/t' 'REG_BINARY' '/d' '9032038010000000' '/f' | Out-Null
+# Set UserPreferencesMask with only 3 effects enabled
+& 'reg' 'add' 'HKLM\zNTUSER\Control Panel\Desktop' '/v' 'UserPreferencesMask' '/t' 'REG_BINARY' '/d' '9032018010000000' '/f' | Out-Null
 
 # 1. [x] Smooth edges of screen fonts
 & 'reg' 'add' 'HKLM\zNTUSER\Control Panel\Desktop' '/v' 'FontSmoothing' '/t' 'REG_SZ' '/d' '2' '/f' | Out-Null
 & 'reg' 'add' 'HKLM\zNTUSER\Control Panel\Desktop' '/v' 'FontSmoothingType' '/t' 'REG_DWORD' '/d' '2' '/f' | Out-Null
 
-# 2. [x] Use drop shadows for icon labels on desktop
-& 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' '/v' 'ListviewShadow' '/t' 'REG_DWORD' '/d' '1' '/f' | Out-Null
+# 2. [ ] DISABLE drop shadows for icon labels on desktop
+& 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' '/v' 'ListviewShadow' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
 
 # Disable all other visual effects explicitly
 & 'reg' 'add' 'HKLM\zNTUSER\Control Panel\Desktop' '/v' 'DragFullWindows' '/t' 'REG_SZ' '/d' '0' '/f' | Out-Null
@@ -410,19 +418,17 @@ Write-Host "Configuring visual effects (custom selection from user)..."
 & 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\FontSmoothing' '/v' 'DefaultApplied' '/t' 'REG_DWORD' '/d' '1' '/f' | Out-Null
 & 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\ListBoxSmoothScrolling' '/v' 'DefaultApplied' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
 & 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\ListviewAlphaSelect' '/v' 'DefaultApplied' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
-& 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\ListviewShadow' '/v' 'DefaultApplied' '/t' 'REG_DWORD' '/d' '1' '/f' | Out-Null
-& 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\MenuAnimation' '/v' 'DefaultApplied' '/t' 'REG_DWORD' '/d' '1' '/f' | Out-Null
+& 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\ListviewShadow' '/v' 'DefaultApplied' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
+& 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\MenuAnimation' '/v' 'DefaultApplied' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
 & 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\SelectionFade' '/v' 'DefaultApplied' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
 & 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\TaskbarAnimations' '/v' 'DefaultApplied' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
 & 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\ThumbnailsOrIcon' '/v' 'DefaultApplied' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
 & 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\TooltipAnimation' '/v' 'DefaultApplied' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
 
-Write-Host "Visual effects configured:"
+Write-Host "Visual effects configured (3 items only):"
 Write-Host "  [x] Smooth edges of screen fonts"
 Write-Host "  [x] Show shadows under windows"
-Write-Host "  [x] Fade or slide menus into view"
 Write-Host "  [x] Show shadows under mouse pointer"
-Write-Host "  [x] Use drop shadows for icon labels on desktop"
 
 # ============================================================================
 # Dev Edition: Configure File Explorer default view
@@ -473,6 +479,8 @@ Write-Host "Configuring File Explorer default view (Details, no grouping)..."
 
 # Hide taskbar search box (SearchboxTaskbarMode: 0=hidden, 1=icon, 2=box)
 & 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\Search' '/v' 'SearchboxTaskbarMode' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
+# Also set via policy to ensure it takes effect
+& 'reg' 'add' 'HKLM\zSOFTWARE\Policies\Microsoft\Windows\Windows Search' '/v' 'SearchboxTaskbarMode' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
 
 # Set taskbar alignment to left (0=left, 1=center)
 & 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' '/v' 'TaskbarAl' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
@@ -494,7 +502,7 @@ Write-Host "Disabling Sponsored Apps:"
 & 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' '/v' 'PreInstalledAppsEnabled' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
 & 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' '/v' 'PreInstalledAppsEverEnabled' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
 & 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' '/v' 'SilentInstalledAppsEnabled' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
-& 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' '/v' 'SoftLandingEnabled' '/t' 'REG_DWORD' '/d' '0' '/f'| Out-Null
+& 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' '/v' 'SoftLandingEnabled' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
 & 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' '/v' 'SubscribedContentEnabled' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
 & 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' '/v' 'SubscribedContent-310093Enabled' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
 & 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' '/v' 'SubscribedContent-338388Enabled' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
@@ -515,120 +523,8 @@ Write-Host "Enabling Local Accounts on OOBE:"
 Copy-Item -Path "$PSScriptRoot\autounattend-dev.xml" -Destination "$ScratchDisk\scratchdir\Windows\System32\Sysprep\autounattend.xml" -Force | Out-Null
 
 # ============================================================================
-# Dev Edition: Create README file on default user's desktop
+# Dev Edition: Desktop files removed - Toolkit folder contains all needed tools
 # ============================================================================
-Write-Host "Creating README file on default user desktop..."
-$defaultDesktop = "$ScratchDisk\scratchdir\Users\Default\Desktop"
-if (-not (Test-Path $defaultDesktop)) {
-    New-Item -ItemType Directory -Force -Path $defaultDesktop | Out-Null
-}
-$readmePath = "$PSScriptRoot\README.ENGINEER.md"
-if (Test-Path $readmePath) {
-    Copy-Item -Path $readmePath -Destination "$defaultDesktop\tiny11-dev-README.md" -Force | Out-Null
-    Write-Host "README file created on desktop!"
-} else {
-    # Create a basic readme if the full one doesn't exist
-    $basicReadme = @"
-# Tiny11 Dev Edition
-
-Welcome to Tiny11 Dev Edition!
-
-## Key Features
-
-- Edge Browser and WebView2 retained
-- Windows Update disabled by default (800-day pause on first boot)
-- Desktop scripts provided to enable updates
-- Traditional context menu (Windows 10 style)
-- Developer shortcuts: CMD here / PowerShell here / PS Admin here
-- File Explorer: Details view, show hidden files and extensions
-- Best performance mode + 5 key visual effects
-
-## Recommended
-
-### Everything - Fast File Search
-Windows Search is set to Manual. Recommend installing Everything:
-https://www.voidtools.com/downloads/
-
-Everything features:
-- Millisecond search speed
-- Very low resource usage
-- Regex support
-- Completely free
-
-## More Info
-
-See README.ENGINEER.md for full documentation.
-
-Build Date: $(Get-Date -Format 'yyyy-MM-dd')
-"@
-    $basicReadme | Out-File -FilePath "$defaultDesktop\tiny11-dev-README.md" -Encoding UTF8
-    Write-Host "Basic README file created on desktop!"
-}
-
-# ============================================================================
-# Dev Edition: Desktop helper scripts (Enable/Resume Windows Update)
-# ============================================================================
-Write-Host "Creating Windows Update helper scripts on desktop..."
-
-$enableWU = @"
-# Requires Administrator privileges - Right-click and "Run as Administrator"
-if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Write-Host 'ERROR: This script requires Administrator privileges!' -ForegroundColor Red
-    Write-Host 'Please right-click the script and select "Run with PowerShell as Administrator"' -ForegroundColor Yellow
-    pause
-    exit 1
-}
-
-Write-Host 'Enabling Windows Update services (Manual)...'
-Set-Service -Name wuauserv -StartupType Manual
-Set-Service -Name UsoSvc -StartupType Manual
-Set-Service -Name WaaSMedicSvc -StartupType Manual
-
-Write-Host 'Allowing Windows Update (policies)...'
-New-Item -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' -Force | Out-Null
-Set-ItemProperty -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' -Name 'NoAutoUpdate' -Type DWord -Value 1
-Set-ItemProperty -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' -Name 'AUOptions' -Type DWord -Value 2
-
-Write-Host 'Done. If updates are paused, open Settings -> Windows Update -> Resume updates.' -ForegroundColor Green
-pause
-"@
-
-$enableAndResumeWU = @"
-# Requires Administrator privileges - Right-click and "Run as Administrator"
-if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Write-Host 'ERROR: This script requires Administrator privileges!' -ForegroundColor Red
-    Write-Host 'Please right-click the script and select "Run with PowerShell as Administrator"' -ForegroundColor Yellow
-    pause
-    exit 1
-}
-
-Write-Host 'Enabling Windows Update services (Manual)...'
-Set-Service -Name wuauserv -StartupType Manual
-Set-Service -Name UsoSvc -StartupType Manual
-Set-Service -Name WaaSMedicSvc -StartupType Manual
-
-Write-Host 'Allowing Windows Update (policies)...'
-New-Item -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' -Force | Out-Null
-Set-ItemProperty -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' -Name 'NoAutoUpdate' -Type DWord -Value 0
-
-Write-Host 'Clearing pause flags (resume updates)...'
-$ux = 'HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings'
-if (Test-Path $ux) {
-  Remove-ItemProperty -Path $ux -Name 'PauseFeatureUpdatesStartTime' -ErrorAction SilentlyContinue
-  Remove-ItemProperty -Path $ux -Name 'PauseFeatureUpdatesEndTime' -ErrorAction SilentlyContinue
-  Remove-ItemProperty -Path $ux -Name 'PauseQualityUpdatesStartTime' -ErrorAction SilentlyContinue
-  Remove-ItemProperty -Path $ux -Name 'PauseQualityUpdatesEndTime' -ErrorAction SilentlyContinue
-  Remove-ItemProperty -Path $ux -Name 'PauseUpdatesStartTime' -ErrorAction SilentlyContinue
-  Remove-ItemProperty -Path $ux -Name 'PauseUpdatesExpiryTime' -ErrorAction SilentlyContinue
-}
-
-Write-Host 'Done. You can now Check for updates.' -ForegroundColor Green
-pause
-"@
-
-$enableWU | Out-File -FilePath "$defaultDesktop\Enable-WindowsUpdate.ps1" -Encoding UTF8 -Force
-$enableAndResumeWU | Out-File -FilePath "$defaultDesktop\Enable-And-Resume-WindowsUpdate.ps1" -Encoding UTF8 -Force
-Write-Host "Windows Update helper scripts created on desktop!"
 
 Write-Host "Disabling Reserved Storage:"
 & 'reg' 'add' 'HKLM\zSOFTWARE\Microsoft\Windows\CurrentVersion\ReserveManager' '/v' 'ShippedWithReserves' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
@@ -760,6 +656,8 @@ Write-Host "Edge browser configured: News feed disabled, clean new tab page!"
 # Note: Must use NTUSER (per-user) path, not SOFTWARE (system-wide)
 # ============================================================================
 Write-Host "Enabling traditional (Windows 10 style) context menu..."
+# First ensure parent key exists
+& 'reg' 'add' 'HKLM\zNTUSER\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}' '/f' | Out-Null
 & 'reg' 'add' 'HKLM\zNTUSER\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32' '/ve' '/t' 'REG_SZ' '/d' '' '/f' | Out-Null
 Write-Host "Traditional context menu enabled!"
 
@@ -806,7 +704,7 @@ Write-Host "Context menu items added (CMD, PowerShell, PowerShell Admin)!"
 # ============================================================================
 # Dev Edition: Configure Windows Update behavior
 # ============================================================================
-Write-Host "Configuring Windows Update (policy-controlled; 800-day pause on first boot)..."
+Write-Host "Configuring Windows Update (policy-controlled; 800-day pause at build time)..."
 
 # Set Windows Update services to Manual (3) - allows Settings page to work properly
 # (Disabled=4 causes "Error" in Settings page which confuses users)
@@ -822,42 +720,19 @@ Write-Host "Configuring Windows Update (policy-controlled; 800-day pause on firs
 & 'reg' 'add' 'HKLM\zSOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' '/v' 'NoAutoRebootWithLoggedOnUsers' '/t' 'REG_DWORD' '/d' '1' '/f' | Out-Null
 & 'reg' 'add' 'HKLM\zSOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' '/v' 'AlwaysAutoRebootAtScheduledTime' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
 
-# Create first-boot script to set Pause Updates for 800 days from INSTALL DATE (more accurate than build date)
-$setupScriptsDir = "$ScratchDisk\scratchdir\Windows\Setup\Scripts"
-New-Item -ItemType Directory -Force -Path $setupScriptsDir | Out-Null
+# ============================================================================
+# Set 800-day pause directly at build time (more reliable than first-boot script)
+# ============================================================================
+$pauseStart = (Get-Date).ToString('yyyy-MM-ddT00:00:00Z')
+$pauseEnd = (Get-Date).AddDays(800).ToString('yyyy-MM-ddT00:00:00Z')
+Write-Host "Setting Windows Update pause: $pauseStart -> $pauseEnd"
 
-$firstBootPs1 = @"
-`$ErrorActionPreference = 'SilentlyContinue'
-
-function Set-WUPause800Days {
-    `$start = (Get-Date).ToString('yyyy-MM-ddT00:00:00Z')
-    `$end = (Get-Date).AddDays(800).ToString('yyyy-MM-ddT00:00:00Z')
-    Write-Output \"[Tiny11 Engineer] Setting Windows Update pause: `$start -> `$end\"
-
-    New-Item -Path 'HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings' -Force | Out-Null
-    Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings' -Name 'PauseFeatureUpdatesStartTime' -Type String -Value `$start
-    Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings' -Name 'PauseFeatureUpdatesEndTime' -Type String -Value `$end
-    Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings' -Name 'PauseQualityUpdatesStartTime' -Type String -Value `$start
-    Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings' -Name 'PauseQualityUpdatesEndTime' -Type String -Value `$end
-    Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings' -Name 'PauseUpdatesStartTime' -Type String -Value `$start
-    Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings' -Name 'PauseUpdatesExpiryTime' -Type String -Value `$end
-}
-
-Set-WUPause800Days
-"@
-
-$firstBootPs1Path = Join-Path $setupScriptsDir 'tiny11-dev-FirstBoot.ps1'
-$firstBootPs1 | Out-File -FilePath $firstBootPs1Path -Encoding UTF8 -Force
-
-$setupCompleteCmd = @"
-@echo off
-REM Tiny11 Dev Edition - First boot configuration
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"%WINDIR%\Setup\Scripts\tiny11-dev-FirstBoot.ps1\"
-exit /b 0
-"@
-
-$setupCompletePath = Join-Path $setupScriptsDir 'SetupComplete.cmd'
-$setupCompleteCmd | Out-File -FilePath $setupCompletePath -Encoding ASCII -Force
+& 'reg' 'add' 'HKLM\zSOFTWARE\Microsoft\WindowsUpdate\UX\Settings' '/v' 'PauseFeatureUpdatesStartTime' '/t' 'REG_SZ' '/d' $pauseStart '/f' | Out-Null
+& 'reg' 'add' 'HKLM\zSOFTWARE\Microsoft\WindowsUpdate\UX\Settings' '/v' 'PauseFeatureUpdatesEndTime' '/t' 'REG_SZ' '/d' $pauseEnd '/f' | Out-Null
+& 'reg' 'add' 'HKLM\zSOFTWARE\Microsoft\WindowsUpdate\UX\Settings' '/v' 'PauseQualityUpdatesStartTime' '/t' 'REG_SZ' '/d' $pauseStart '/f' | Out-Null
+& 'reg' 'add' 'HKLM\zSOFTWARE\Microsoft\WindowsUpdate\UX\Settings' '/v' 'PauseQualityUpdatesEndTime' '/t' 'REG_SZ' '/d' $pauseEnd '/f' | Out-Null
+& 'reg' 'add' 'HKLM\zSOFTWARE\Microsoft\WindowsUpdate\UX\Settings' '/v' 'PauseUpdatesStartTime' '/t' 'REG_SZ' '/d' $pauseStart '/f' | Out-Null
+& 'reg' 'add' 'HKLM\zSOFTWARE\Microsoft\WindowsUpdate\UX\Settings' '/v' 'PauseUpdatesExpiryTime' '/t' 'REG_SZ' '/d' $pauseEnd '/f' | Out-Null
 
 # Dev Edition: KEEP driver updates enabled for hardware compatibility
 # The following lines are COMMENTED OUT to preserve online driver installation
@@ -877,7 +752,7 @@ Write-Host "Online driver installation: Enabled (for hardware compatibility)"
 # Notify user before downloading updates
 & 'reg' 'add' 'HKLM\zSOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' '/v' 'AUOptions' '/t' 'REG_DWORD' '/d' '2' '/f' | Out-Null
 
-Write-Host "Windows Update configured: DISABLED by default; first boot will set 800-day pause. Use desktop scripts to enable when needed."
+Write-Host "Windows Update configured: 800-day pause set from build date. Use Toolkit scripts to resume when needed."
 
 $tasksPath = "$ScratchDisk\scratchdir\Windows\System32\Tasks"
 
@@ -920,7 +795,8 @@ if (Test-Path $toolkitSource) {
     $currentScript = $MyInvocation.MyCommand.Path
     if (Test-Path $currentScript) {
         Copy-Item -Path $currentScript -Destination $toolkitDest -Force
-    } else {
+    }
+    else {
         Write-Host "Warning: Could not determine current script path to copy." -ForegroundColor Yellow
     }
     
@@ -931,9 +807,10 @@ if (Test-Path $toolkitSource) {
         $buildDate = Get-Date -Format "yyyy-MM-dd HH:mm"
         # Try to get original ISO name from drive label
         try {
-            $volume = Get-Volume -DriveLetter ($DriveLetter -replace ':','') -ErrorAction SilentlyContinue
+            $volume = Get-Volume -DriveLetter ($DriveLetter -replace ':', '') -ErrorAction SilentlyContinue
             $isoLabel = if ($volume) { $volume.FileSystemLabel } else { "Windows 11" }
-        } catch { $isoLabel = "Windows 11" }
+        }
+        catch { $isoLabel = "Windows 11" }
         # Replace unique placeholders
         $readmeContent = $readmeContent -replace '\[ISO_NAME_PLACEHOLDER\]', $isoLabel
         $readmeContent = $readmeContent -replace '\[BUILD_DATE_PLACEHOLDER\]', $buildDate
@@ -941,7 +818,8 @@ if (Test-Path $toolkitSource) {
     }
     
     Write-Host "Tiny11-Dev-Toolkit copied to desktop successfully!"
-} else {
+}
+else {
     Write-Host "Warning: Tiny11-Dev-Toolkit folder not found at $toolkitSource"
     Write-Host "Desktop toolkit will not be included."
 }
@@ -1010,7 +888,8 @@ try {
         Read-Host "Press Enter to exit"
         exit 1
     }
-} catch {
+}
+catch {
     Write-Error "ERROR: Exception during DISM Export: $_"
     Write-Host "Keeping original install.wim"
     Read-Host "Press Enter to exit"
@@ -1070,7 +949,8 @@ $localOSCDIMGPath = "$PSScriptRoot\oscdimg.exe"
 if ([System.IO.Directory]::Exists($ADKDepTools)) {
     Write-Host "Will be using oscdimg.exe from system ADK."
     $OSCDIMG = "$ADKDepTools\oscdimg.exe"
-} else {
+}
+else {
     Write-Host "ADK folder not found. Will be using bundled oscdimg.exe."
     
     $url = "https://msdl.microsoft.com/download/symbols/oscdimg.exe/3D44737265000/oscdimg.exe"
@@ -1081,11 +961,13 @@ if ([System.IO.Directory]::Exists($ADKDepTools)) {
 
         if (Test-Path $localOSCDIMGPath) {
             Write-Host "oscdimg.exe downloaded successfully."
-        } else {
+        }
+        else {
             Write-Error "Failed to download oscdimg.exe."
             exit 1
         }
-    } else {
+    }
+    else {
         Write-Host "oscdimg.exe already exists locally."
     }
 

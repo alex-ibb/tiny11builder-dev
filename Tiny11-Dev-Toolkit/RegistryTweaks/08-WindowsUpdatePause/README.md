@@ -2,7 +2,7 @@
 
 ## 功能说明
 
-Tiny11 Dev Edition 在首次启动时自动设置 Windows Update 暂停 800 天。此工具可以取消暂停。
+Tiny11 Dev Edition 在镜像构建时自动设置 Windows Update 暂停 800 天（从构建日期起）。此工具可以取消暂停。
 
 ## 默认状态
 
