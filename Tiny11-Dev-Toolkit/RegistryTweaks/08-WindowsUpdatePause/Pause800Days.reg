@@ -2,7 +2,13 @@ Windows Registry Editor Version 5.00
 
 ; 暂停 Windows Update 800 天
 ; Pause Windows Update for 800 days
-; 注意: 日期基于运行此文件时的系统时间计算
+;
+; ⚠️ 注意: 以下日期是静态硬编码的 (起始: 2026-01-17, 结束: 2028-03-28)
+; 如果在其他日期运行，请手动修改下方的日期值
+; 或使用桌面上的 Enable-And-Resume-WindowsUpdate.ps1 脚本 (可动态计算)
+;
+; WARNING: Dates below are hardcoded. Edit them manually if running at a later date,
+; or use the PowerShell scripts on desktop for dynamic date calculation.
 
 [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings]
 "PauseFeatureUpdatesStartTime"="2026-01-17T00:00:00Z"

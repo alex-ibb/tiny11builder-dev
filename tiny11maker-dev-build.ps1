@@ -66,6 +66,9 @@ Write-Host "  - Context menu: 'CMD here', 'PowerShell here', 'PS Admin here'"
 Write-Host "  - Widgets disabled (saves memory)"
 Write-Host "  - Search Highlights disabled (reduces network)"
 Write-Host "  - Xbox background services disabled"
+Write-Host "  - DiagTrack (telemetry collector) disabled"
+Write-Host "  - Delivery Optimization (P2P updates) disabled"
+Write-Host "  - SysMain (SuperFetch) disabled - optimized for SSD"
 Write-Host "  - Windows Search set to Manual (recommend Everything)"
 Write-Host "  - Lock Screen: Spotlight/news/tips disabled"
 Write-Host "  - Edge: News feed disabled, clean new tab page"
@@ -290,6 +293,15 @@ Write-Host "Removing OneDrive:"
 & 'takeown' '/f' "$ScratchDisk\scratchdir\Windows\System32\OneDriveSetup.exe" | Out-Null
 & 'icacls' "$ScratchDisk\scratchdir\Windows\System32\OneDriveSetup.exe" '/grant' "$($adminGroup.Value):(F)" '/T' '/C' | Out-Null
 Remove-Item -Path "$ScratchDisk\scratchdir\Windows\System32\OneDriveSetup.exe" -Force | Out-Null
+# Also remove SysWOW64 copy (prevents OneDrive auto-install for new users on 64-bit systems)
+if (Test-Path "$ScratchDisk\scratchdir\Windows\SysWOW64\OneDriveSetup.exe") {
+    & 'takeown' '/f' "$ScratchDisk\scratchdir\Windows\SysWOW64\OneDriveSetup.exe" | Out-Null
+    & 'icacls' "$ScratchDisk\scratchdir\Windows\SysWOW64\OneDriveSetup.exe" '/grant' "$($adminGroup.Value):(F)" '/T' '/C' | Out-Null
+    Remove-Item -Path "$ScratchDisk\scratchdir\Windows\SysWOW64\OneDriveSetup.exe" -Force | Out-Null
+    Write-Host "OneDrive removed (System32 + SysWOW64)"
+} else {
+    Write-Host "OneDrive removed (System32 only, SysWOW64 not found)"
+}
 
 Write-Host "Removing Microsoft PC Manager:"
 # Remove PC Manager if present (typically in Program Files)
@@ -701,6 +713,30 @@ Write-Host "Disabling Xbox background services..."
 & 'reg' 'add' 'HKLM\zSYSTEM\ControlSet001\Services\XboxGipSvc' '/v' 'Start' '/t' 'REG_DWORD' '/d' '4' '/f' | Out-Null
 & 'reg' 'add' 'HKLM\zSYSTEM\ControlSet001\Services\XboxNetApiSvc' '/v' 'Start' '/t' 'REG_DWORD' '/d' '4' '/f' | Out-Null
 Write-Host "Xbox services disabled!"
+
+# ============================================================================
+# Dev Edition: Disable DiagTrack (Connected User Experiences and Telemetry)
+# Complements the AllowTelemetry=0 policy set earlier
+# ============================================================================
+Write-Host "Disabling DiagTrack service (telemetry collector)..."
+& 'reg' 'add' 'HKLM\zSYSTEM\ControlSet001\Services\DiagTrack' '/v' 'Start' '/t' 'REG_DWORD' '/d' '4' '/f' | Out-Null
+Write-Host "DiagTrack service disabled!"
+
+# ============================================================================
+# Dev Edition: Disable Delivery Optimization (P2P update distribution)
+# Prevents background bandwidth usage for distributing updates to other PCs
+# ============================================================================
+Write-Host "Disabling Delivery Optimization (DoSvc)..."
+& 'reg' 'add' 'HKLM\zSYSTEM\ControlSet001\Services\DoSvc' '/v' 'Start' '/t' 'REG_DWORD' '/d' '4' '/f' | Out-Null
+Write-Host "Delivery Optimization disabled!"
+
+# ============================================================================
+# Dev Edition: Disable SysMain (SuperFetch) - not needed on SSD systems
+# Reduces memory usage and disk I/O on SSD-equipped developer machines
+# ============================================================================
+Write-Host "Disabling SysMain (SuperFetch)..."
+& 'reg' 'add' 'HKLM\zSYSTEM\ControlSet001\Services\SysMain' '/v' 'Start' '/t' 'REG_DWORD' '/d' '4' '/f' | Out-Null
+Write-Host "SysMain disabled!"
 
 # ============================================================================
 # Dev Edition: Set Windows Search to Manual (recommend Everything)

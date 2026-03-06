@@ -16,10 +16,10 @@
 
 ```powershell
 # 运行构建脚本
-.\tiny11maker-dev-build.ps1
+powershell -ExecutionPolicy Bypass -File .\tiny11maker-dev-build.ps1
 
 # 指定工作磁盘
-.\tiny11maker-dev-build.ps1 -ScratchDisk D
+powershell -ExecutionPolicy Bypass -File .\tiny11maker-dev-build.ps1 -ScratchDisk D
 ```
 
 ---
