@@ -69,6 +69,8 @@ powershell -ExecutionPolicy Bypass -File .\tiny11maker-dev-build.ps1 -ScratchDis
 | Windows Search | 手动 | 节省 ~50-150 MB |
 | 遥测服务 (dmwappushservice) | 禁用 | 隐私保护 |
 | DiagTrack | 禁用 | 主要遥测服务 |
+| DoSvc (传递优化) | 禁用 | P2P 更新分发，占用上行带宽 |
+| SysMain (SuperFetch) | 禁用 | SSD 环境不需要，减少内存占用 |
 | 诊断服务 (DPS/WdiServiceHost/WdiSystemHost) | 禁用 | 诊断数据上传 |
 | 传真 (Fax) | 禁用 | 无用服务 |
 | 远程注册表 (RemoteRegistry) | 禁用 | 安全风险 |
@@ -119,7 +121,7 @@ powershell -ExecutionPolicy Bypass -File .\tiny11maker-dev-build.ps1 -ScratchDis
 
 ## Tiny11-Dev-Toolkit
 
-安装后桌面会放置工具包，包含 15 个注册表调整模块：
+安装后桌面会放置工具包，包含 16 个注册表调整模块：
 
 | # | 功能 | 文件 |
 |---|------|------|
@@ -138,6 +140,7 @@ powershell -ExecutionPolicy Bypass -File .\tiny11maker-dev-build.ps1 -ScratchDis
 | 13 | Edge 优化 | Optimize.reg / Default.reg |
 | 14 | 文件资源管理器 | Developer.reg / Default.reg |
 | 15 | 窗口边框颜色 | Enable.reg / Disable.reg |
+| 16 | 额外服务优化 | Disable.reg / Enable.reg |
 
 每个模块都附带 README.md 说明文档。
 
@@ -243,4 +246,4 @@ HKCR\Directory\Background\shell\psadmin
 
 **Tiny11 Dev Edition** - 专为开发者设计的精简 Windows 11
 
-构建日期: 2026-01-17 | 版本: 1.7
+构建日期: 2026-01-25 | 版本: 1.8
