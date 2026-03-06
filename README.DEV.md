@@ -6,8 +6,8 @@
 
 | 项目 | 内容 |
 |------|------|
-| 版本 | Dev Edition v1.7 |
-| 更新日期 | 2026-01-17 |
+| 版本 | Dev Edition v1.8 |
+| 更新日期 | 2026-01-25 |
 | 基于 | tiny11maker.ps1 |
 
 ---
@@ -62,13 +62,19 @@ powershell -ExecutionPolicy Bypass -File .\tiny11maker-dev-build.ps1 -ScratchDis
 
 ### 3. 后台服务优化
 
-| 服务 | 状态 | 节省内存 |
-|------|:----:|----------|
-| Widgets | 禁用 | ~50-100 MB |
-| Xbox 服务 (4个) | 禁用 | ~20-50 MB |
+| 服务 | 状态 | 说明 |
+|------|:----:|------|
+| Widgets | 禁用 | 节省 ~50-100 MB |
+| Xbox 服务 (4个) | 禁用 | 节省 ~20-50 MB |
+| Windows Search | 手动 | 节省 ~50-150 MB |
+| 遥测服务 (dmwappushservice) | 禁用 | 隐私保护 |
+| DiagTrack | 禁用 | 主要遥测服务 |
+| 诊断服务 (DPS/WdiServiceHost/WdiSystemHost) | 禁用 | 诊断数据上传 |
+| 传真 (Fax) | 禁用 | 无用服务 |
+| 远程注册表 (RemoteRegistry) | 禁用 | 安全风险 |
+| 地理位置 (lfsvc) | 禁用 | 开发机不需要 |
+| 零售演示 (RetailDemo) | 禁用 | 仅商店展示 |
 | 搜索突出显示 | 禁用 | 减少网络 |
-| Windows Search | 手动 | ~50-150 MB |
-| 遥测服务 | 禁用 | - |
 
 > **推荐**: 安装 [Everything](https://www.voidtools.com/) 替代 Windows Search，毫秒级响应
 
@@ -77,7 +83,8 @@ powershell -ExecutionPolicy Bypass -File .\tiny11maker-dev-build.ps1 -ScratchDis
 | 项目 | 配置 |
 |------|------|
 | 右键菜单 | Windows 10 传统风格 |
-| 视觉效果 | 性能模式 + 5项关键效果 |
+| 任务栏按钮 | 任务栏已满时合并 |
+| 视觉效果 | 性能模式 + 3项关键效果 |
 | 文件资源管理器 | 详细列表、无分组、显示隐藏文件/扩展名 |
 | 锁屏界面 | 禁用聚焦/天气/新闻/提示 |
 | Edge 新标签页 | 空白页，禁用新闻 |
@@ -85,9 +92,7 @@ powershell -ExecutionPolicy Bypass -File .\tiny11maker-dev-build.ps1 -ScratchDis
 **保留的视觉效果**:
 - 字体平滑 (ClearType)
 - 窗口阴影
-- 菜单淡入
 - 鼠标指针阴影
-- 图标标签阴影
 
 ### 5. 开发者右键菜单
 
@@ -103,17 +108,12 @@ powershell -ExecutionPolicy Bypass -File .\tiny11maker-dev-build.ps1 -ScratchDis
 
 | 配置 | 值 |
 |------|------|
-| 默认状态 | **禁用** (需手动启用) |
-| 暂停时间 | 首次开机自动暂停 800 天 |
+| 默认状态 | **暂停** (需使用 Toolkit 恢复) |
+| 暂停时间 | 构建时自动设置暂停 800 天 |
 | 活动时间 | 8:00-20:00 (工作时间不重启) |
 | 下载模式 | 仅通知，不自动下载 |
 
-**桌面提供的控制脚本** (需管理员运行):
-
-| 脚本 | 功能 |
-|------|------|
-| `Enable-WindowsUpdate.ps1` | 启用服务 (暂停仍生效) |
-| `Enable-And-Resume-WindowsUpdate.ps1` | 启用并清除暂停，可立即更新 |
+**恢复更新**: 使用桌面 Toolkit 中的 `RegistryTweaks/08-WindowsUpdatePause/Resume.reg`
 
 ---
 
@@ -162,10 +162,10 @@ Clipchamp、Bing 新闻/天气、Xbox 应用、获取帮助、使用技巧、Off
 
 ### Windows Update 策略
 ```
-服务启动类型 = 禁用 (默认)
+服务启动类型 = 手动 (Manual)
 自动下载 = 否
 自动重启 = 否
-暂停更新 = 800 天
+暂停更新 = 800 天 (从构建日期起)
 活动时间 = 8:00-20:00
 ```
 
