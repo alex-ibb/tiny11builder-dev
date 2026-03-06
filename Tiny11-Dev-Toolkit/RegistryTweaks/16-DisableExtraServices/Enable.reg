@@ -1,0 +1,47 @@
+Windows Registry Editor Version 5.00
+
+; 恢复额外的后台服务到默认状态 (Manual)
+; Restore extra background services to default (Manual)
+;
+; 包含: DiagTrack, DoSvc, SysMain, Fax, RemoteRegistry,
+;        lfsvc, RetailDemo, DPS, WdiServiceHost, WdiSystemHost
+
+; DiagTrack - 遥测数据收集
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DiagTrack]
+"Start"=dword:00000003
+
+; DoSvc - 传递优化
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DoSvc]
+"Start"=dword:00000003
+
+; SysMain - SuperFetch
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\SysMain]
+"Start"=dword:00000003
+
+; Fax - 传真服务
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Fax]
+"Start"=dword:00000003
+
+; RemoteRegistry - 远程注册表
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\RemoteRegistry]
+"Start"=dword:00000004
+
+; lfsvc - 地理位置服务
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\lfsvc]
+"Start"=dword:00000003
+
+; RetailDemo - 零售演示服务
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\RetailDemo]
+"Start"=dword:00000003
+
+; DPS - 诊断策略服务 (恢复后疑难解答可用)
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DPS]
+"Start"=dword:00000002
+
+; WdiServiceHost - 诊断服务主机
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WdiServiceHost]
+"Start"=dword:00000003
+
+; WdiSystemHost - 诊断系统主机
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WdiSystemHost]
+"Start"=dword:00000003

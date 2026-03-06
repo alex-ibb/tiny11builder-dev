@@ -1,0 +1,50 @@
+Windows Registry Editor Version 5.00
+
+; 禁用额外的后台服务 (开发者环境优化)
+; Disable extra background services (developer optimization)
+;
+; 包含: DiagTrack, DoSvc, SysMain, Fax, RemoteRegistry,
+;        lfsvc, RetailDemo, DPS, WdiServiceHost, WdiSystemHost
+;
+; ⚠️ 注意: 禁用 DPS/WdiServiceHost/WdiSystemHost 后，
+; Windows 疑难解答工具将无法使用。如需恢复，运行 Enable.reg
+
+; DiagTrack - 遥测数据收集 (Connected User Experiences and Telemetry)
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DiagTrack]
+"Start"=dword:00000004
+
+; DoSvc - 传递优化 (P2P 更新分发，会使用上行带宽)
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DoSvc]
+"Start"=dword:00000004
+
+; SysMain - SuperFetch (SSD 环境不需要，减少内存占用)
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\SysMain]
+"Start"=dword:00000004
+
+; Fax - 传真服务
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Fax]
+"Start"=dword:00000004
+
+; RemoteRegistry - 远程注册表 (安全风险)
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\RemoteRegistry]
+"Start"=dword:00000004
+
+; lfsvc - 地理位置服务
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\lfsvc]
+"Start"=dword:00000004
+
+; RetailDemo - 零售演示服务 (仅商店展示用)
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\RetailDemo]
+"Start"=dword:00000004
+
+; DPS - 诊断策略服务 (禁用后疑难解答不可用)
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DPS]
+"Start"=dword:00000004
+
+; WdiServiceHost - 诊断服务主机
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WdiServiceHost]
+"Start"=dword:00000004
+
+; WdiSystemHost - 诊断系统主机
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WdiSystemHost]
+"Start"=dword:00000004
