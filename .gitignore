@@ -1,0 +1,10 @@
+# Build outputs
+*.iso
+*.iso.log
+
+# Binary tools
+oscdimg.exe
+
+# Temp folders
+scratchdir/
+tiny11/
