@@ -10,6 +10,22 @@ else {
     $ScratchDisk = $ScratchDisk + ":"
 }
 
+function Get-ValidImageIndex {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$ImagePath
+    )
+
+    $imageIndexes = (Get-WindowsImage -ImagePath $ImagePath).ImageIndex
+    $selectedIndex = $null
+    while ($imageIndexes -notcontains $selectedIndex) {
+        Get-WindowsImage -ImagePath $ImagePath
+        $selectedIndex = Read-Host "Please enter the image index"
+    }
+
+    return $selectedIndex
+}
+
 Write-Output "Scratch disk set to $ScratchDisk"
 
 # Check if PowerShell execution is restricted
@@ -33,8 +49,16 @@ $myWindowsPrincipal = new-object System.Security.Principal.WindowsPrincipal($myW
 $adminRole = [System.Security.Principal.WindowsBuiltInRole]::Administrator
 if (! $myWindowsPrincipal.IsInRole($adminRole)) {
     Write-Host "Restarting Tiny11 image creator as admin in a new window, you can close this one."
+    $scriptPath = $MyInvocation.MyCommand.Path
+    $elevationArgs = @(
+        '-ExecutionPolicy', 'Bypass',
+        '-File', ('"{0}"' -f $scriptPath)
+    )
+    if ($PSBoundParameters.ContainsKey('ScratchDisk')) {
+        $elevationArgs += @('-ScratchDisk', $PSBoundParameters['ScratchDisk'])
+    }
     $newProcess = new-object System.Diagnostics.ProcessStartInfo "PowerShell";
-    $newProcess.Arguments = $myInvocation.MyCommand.Definition;
+    $newProcess.Arguments = $elevationArgs -join ' ';
     $newProcess.Verb = "runas";
     [System.Diagnostics.Process]::Start($newProcess);
     exit
@@ -83,7 +107,7 @@ Write-Host ""
 Write-Host "Checking for residual state from previous builds..." -ForegroundColor Yellow
 
 $cleanupNeeded = $false
-$hives = @('zCOMPONENTS', 'zDEFAULT', 'zNTUSER', 'zSOFTWARE', 'zSYSTEM')
+$hives = @('zCOMPONENTS', 'zDEFAULT', 'zNTUSER', 'zSOFTWARE', 'zSYSTEM', 'zUSRCLASS')
 $loadedHives = @()
 
 # Check for loaded registry hives
@@ -188,8 +212,7 @@ do {
 if ((Test-Path "$DriveLetter\sources\boot.wim") -eq $false -or (Test-Path "$DriveLetter\sources\install.wim") -eq $false) {
     if ((Test-Path "$DriveLetter\sources\install.esd") -eq $true) {
         Write-Host "Found install.esd, converting to install.wim..."
-        Get-WindowsImage -ImagePath $DriveLetter\sources\install.esd
-        $index = Read-Host "Please enter the image index"
+        $index = Get-ValidImageIndex -ImagePath "$DriveLetter\sources\install.esd"
         Write-Host ' '
         Write-Host 'Converting install.esd to install.wim. This may take a while...'
         Export-WindowsImage -SourceImagePath $DriveLetter\sources\install.esd -SourceIndex $index -DestinationImagePath $ScratchDisk\tiny11\sources\install.wim -Compressiontype Maximum -CheckIntegrity
@@ -209,8 +232,7 @@ Write-Host "Copy complete!"
 Start-Sleep -Seconds 2
 Clear-Host
 Write-Host "Getting image information:"
-Get-WindowsImage -ImagePath $ScratchDisk\tiny11\sources\install.wim
-$index = Read-Host "Please enter the image index"
+$index = Get-ValidImageIndex -ImagePath "$ScratchDisk\tiny11\sources\install.wim"
 Write-Host "Mounting Windows image. This may take a while."
 $wimFilePath = "$ScratchDisk\tiny11\sources\install.wim"
 & takeown "/F" $wimFilePath 
@@ -269,7 +291,7 @@ ForEach-Object {
 #   - Microsoft.ScreenSketch_ (Snipping Tool)
 #   - Edge and WebView2 (handled separately - NOT removed in this version)
 
-$packagePrefixes = 'Clipchamp.Clipchamp_', 'Microsoft.BingNews_', 'Microsoft.BingWeather_', 'Microsoft.GamingApp_', 'Microsoft.GetHelp_', 'Microsoft.Getstarted_', 'Microsoft.MicrosoftOfficeHub_', 'Microsoft.MicrosoftSolitaireCollection_', 'Microsoft.People_', 'Microsoft.PowerAutomateDesktop_', 'Microsoft.Todos_', 'Microsoft.WindowsAlarms_', 'microsoft.windowscommunicationsapps_', 'Microsoft.WindowsFeedbackHub_', 'Microsoft.WindowsMaps_', 'Microsoft.WindowsSoundRecorder_', 'Microsoft.Xbox.TCUI_', 'Microsoft.XboxGamingOverlay_', 'Microsoft.XboxGameOverlay_', 'Microsoft.XboxSpeechToTextOverlay_', 'Microsoft.YourPhone_', 'Microsoft.ZuneMusic_', 'Microsoft.ZuneVideo_', 'MicrosoftCorporationII.MicrosoftFamily_', 'MicrosoftCorporationII.QuickAssist_', 'MicrosoftTeams_', 'Microsoft.549981C3F5F10_', 'Microsoft.Windows.Copilot', 'MSTeams_', 'Microsoft.OutlookForWindows_', 'Microsoft.Windows.Teams_', 'Microsoft.Copilot_', 'Microsoft.MicrosoftPCManager_'
+$packagePrefixes = 'Clipchamp.Clipchamp_', 'Microsoft.BingNews_', 'Microsoft.BingSearch_', 'Microsoft.BingWeather_', 'Microsoft.GamingApp_', 'Microsoft.GetHelp_', 'Microsoft.Getstarted_', 'Microsoft.Microsoft3DViewer_', 'Microsoft.MicrosoftOfficeHub_', 'Microsoft.MicrosoftSolitaireCollection_', 'Microsoft.MicrosoftStickyNotes_', 'Microsoft.Office.OneNote_', 'Microsoft.OfficePushNotificationUtility_', 'Microsoft.People_', 'Microsoft.PowerAutomateDesktop_', 'Microsoft.StartExperiencesApp_', 'Microsoft.Todos_', 'Microsoft.Wallet_', 'Microsoft.Windows.CrossDevice_', 'Microsoft.Windows.DevHome_', 'Microsoft.WindowsAlarms_', 'Microsoft.WindowsCamera_', 'microsoft.windowscommunicationsapps_', 'Microsoft.WindowsFeedbackHub_', 'Microsoft.WindowsMaps_', 'Microsoft.WindowsSoundRecorder_', 'Microsoft.Xbox.TCUI_', 'Microsoft.XboxApp_', 'Microsoft.XboxGamingOverlay_', 'Microsoft.XboxGameOverlay_', 'Microsoft.XboxIdentityProvider_', 'Microsoft.XboxSpeechToTextOverlay_', 'Microsoft.YourPhone_', 'Microsoft.ZuneMusic_', 'Microsoft.ZuneVideo_', 'MicrosoftCorporationII.MicrosoftFamily_', 'MicrosoftCorporationII.QuickAssist_', 'MicrosoftTeams_', 'Microsoft.549981C3F5F10_', 'Microsoft.Windows.Copilot', 'MSTeams_', 'Microsoft.OutlookForWindows_', 'Microsoft.Windows.Teams_', 'Microsoft.Copilot_', 'Microsoft.MicrosoftPCManager_'
 
 $packagesToRemove = $packages | Where-Object {
     $packageName = $_
@@ -457,31 +479,32 @@ Write-Host "Configuring File Explorer default view (Details, no grouping)..."
 & 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' '/v' 'GroupView' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
 
 # Set Details view as default for various folder types
+# UsrClass.dat stores HKCU\Software\Classes, so these Bags settings belong in zUSRCLASS.
 # Generic folder
-& 'reg' 'add' 'HKLM\zNTUSER\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell' '/v' 'FolderType' '/t' 'REG_SZ' '/d' 'NotSpecified' '/f' | Out-Null
-& 'reg' 'add' 'HKLM\zNTUSER\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell' '/v' 'LogicalViewMode' '/t' 'REG_DWORD' '/d' '1' '/f' | Out-Null
-& 'reg' 'add' 'HKLM\zNTUSER\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell' '/v' 'Mode' '/t' 'REG_DWORD' '/d' '4' '/f' | Out-Null
-& 'reg' 'add' 'HKLM\zNTUSER\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell' '/v' 'IconSize' '/t' 'REG_DWORD' '/d' '16' '/f' | Out-Null
+& 'reg' 'add' 'HKLM\zUSRCLASS\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell' '/v' 'FolderType' '/t' 'REG_SZ' '/d' 'NotSpecified' '/f' | Out-Null
+& 'reg' 'add' 'HKLM\zUSRCLASS\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell' '/v' 'LogicalViewMode' '/t' 'REG_DWORD' '/d' '1' '/f' | Out-Null
+& 'reg' 'add' 'HKLM\zUSRCLASS\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell' '/v' 'Mode' '/t' 'REG_DWORD' '/d' '4' '/f' | Out-Null
+& 'reg' 'add' 'HKLM\zUSRCLASS\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell' '/v' 'IconSize' '/t' 'REG_DWORD' '/d' '16' '/f' | Out-Null
 
 # Disable grouping - set GroupBy to empty (Prop:System.Null)
-& 'reg' 'add' 'HKLM\zNTUSER\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell' '/v' 'GroupBy' '/t' 'REG_SZ' '/d' 'System.Null' '/f' | Out-Null
-& 'reg' 'add' 'HKLM\zNTUSER\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell' '/v' 'GroupByDirection' '/t' 'REG_DWORD' '/d' '1' '/f' | Out-Null
-& 'reg' 'add' 'HKLM\zNTUSER\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell' '/v' 'GroupByKey:FMTID' '/t' 'REG_SZ' '/d' '{00000000-0000-0000-0000-000000000000}' '/f' | Out-Null
-& 'reg' 'add' 'HKLM\zNTUSER\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell' '/v' 'GroupByKey:PID' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
+& 'reg' 'add' 'HKLM\zUSRCLASS\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell' '/v' 'GroupBy' '/t' 'REG_SZ' '/d' 'System.Null' '/f' | Out-Null
+& 'reg' 'add' 'HKLM\zUSRCLASS\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell' '/v' 'GroupByDirection' '/t' 'REG_DWORD' '/d' '1' '/f' | Out-Null
+& 'reg' 'add' 'HKLM\zUSRCLASS\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell' '/v' 'GroupByKey:FMTID' '/t' 'REG_SZ' '/d' '{00000000-0000-0000-0000-000000000000}' '/f' | Out-Null
+& 'reg' 'add' 'HKLM\zUSRCLASS\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell' '/v' 'GroupByKey:PID' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
 
 # Set sorting by Name (ascending)
-& 'reg' 'add' 'HKLM\zNTUSER\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell' '/v' 'Sort' '/t' 'REG_BINARY' '/d' '0000000000000000000000000000000001000000000000000000000000000000010000004e0061006d0065000000' '/f' | Out-Null
+& 'reg' 'add' 'HKLM\zUSRCLASS\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell' '/v' 'Sort' '/t' 'REG_BINARY' '/d' '0000000000000000000000000000000001000000000000000000000000000000010000004e0061006d0065000000' '/f' | Out-Null
 
 # Configure specific folder views
 # Documents/General items folder
-& 'reg' 'add' 'HKLM\zNTUSER\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags\1\Shell' '/v' 'FolderType' '/t' 'REG_SZ' '/d' 'NotSpecified' '/f' | Out-Null
-& 'reg' 'add' 'HKLM\zNTUSER\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags\1\Shell' '/v' 'LogicalViewMode' '/t' 'REG_DWORD' '/d' '1' '/f' | Out-Null
-& 'reg' 'add' 'HKLM\zNTUSER\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags\1\Shell' '/v' 'Mode' '/t' 'REG_DWORD' '/d' '4' '/f' | Out-Null
-& 'reg' 'add' 'HKLM\zNTUSER\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags\1\Shell' '/v' 'GroupBy' '/t' 'REG_SZ' '/d' 'System.Null' '/f' | Out-Null
+& 'reg' 'add' 'HKLM\zUSRCLASS\Local Settings\Software\Microsoft\Windows\Shell\Bags\1\Shell' '/v' 'FolderType' '/t' 'REG_SZ' '/d' 'NotSpecified' '/f' | Out-Null
+& 'reg' 'add' 'HKLM\zUSRCLASS\Local Settings\Software\Microsoft\Windows\Shell\Bags\1\Shell' '/v' 'LogicalViewMode' '/t' 'REG_DWORD' '/d' '1' '/f' | Out-Null
+& 'reg' 'add' 'HKLM\zUSRCLASS\Local Settings\Software\Microsoft\Windows\Shell\Bags\1\Shell' '/v' 'Mode' '/t' 'REG_DWORD' '/d' '4' '/f' | Out-Null
+& 'reg' 'add' 'HKLM\zUSRCLASS\Local Settings\Software\Microsoft\Windows\Shell\Bags\1\Shell' '/v' 'GroupBy' '/t' 'REG_SZ' '/d' 'System.Null' '/f' | Out-Null
 
 # Computer/This PC
-& 'reg' 'add' 'HKLM\zNTUSER\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags\1\ComDlg' '/v' 'LogicalViewMode' '/t' 'REG_DWORD' '/d' '1' '/f' | Out-Null
-& 'reg' 'add' 'HKLM\zNTUSER\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags\1\ComDlg' '/v' 'Mode' '/t' 'REG_DWORD' '/d' '4' '/f' | Out-Null
+& 'reg' 'add' 'HKLM\zUSRCLASS\Local Settings\Software\Microsoft\Windows\Shell\Bags\1\ComDlg' '/v' 'LogicalViewMode' '/t' 'REG_DWORD' '/d' '1' '/f' | Out-Null
+& 'reg' 'add' 'HKLM\zUSRCLASS\Local Settings\Software\Microsoft\Windows\Shell\Bags\1\ComDlg' '/v' 'Mode' '/t' 'REG_DWORD' '/d' '4' '/f' | Out-Null
 
 # Additional Explorer settings for better file browsing
 & 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' '/v' 'Hidden' '/t' 'REG_DWORD' '/d' '1' '/f' | Out-Null
@@ -512,13 +535,8 @@ Write-Host "Disabling Sponsored Apps:"
 & 'reg' 'add' 'HKLM\zSOFTWARE\Policies\Microsoft\Windows\CloudContent' '/v' 'DisableWindowsConsumerFeatures' '/t' 'REG_DWORD' '/d' '1' '/f' | Out-Null
 & 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' '/v' 'ContentDeliveryAllowed' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
 & 'reg' 'add' 'HKLM\zSOFTWARE\Microsoft\PolicyManager\current\device\Start' '/v' 'ConfigureStartPins' '/t' 'REG_SZ' '/d' '{"pinnedList": [{}]}' '/f' | Out-Null
-& 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' '/v' 'ContentDeliveryAllowed' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
-& 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' '/v' 'ContentDeliveryAllowed' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
 & 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' '/v' 'FeatureManagementEnabled' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
-& 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' '/v' 'OemPreInstalledAppsEnabled' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
-& 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' '/v' 'PreInstalledAppsEnabled' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
 & 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' '/v' 'PreInstalledAppsEverEnabled' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
-& 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' '/v' 'SilentInstalledAppsEnabled' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
 & 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' '/v' 'SoftLandingEnabled' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
 & 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' '/v' 'SubscribedContentEnabled' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
 & 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' '/v' 'SubscribedContent-310093Enabled' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
@@ -527,7 +545,6 @@ Write-Host "Disabling Sponsored Apps:"
 & 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' '/v' 'SubscribedContent-338393Enabled' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
 & 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' '/v' 'SubscribedContent-353694Enabled' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
 & 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' '/v' 'SubscribedContent-353696Enabled' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
-& 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' '/v' 'SubscribedContentEnabled' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
 & 'reg' 'add' 'HKLM\zNTUSER\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' '/v' 'SystemPaneSuggestionsEnabled' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
 & 'reg' 'add' 'HKLM\zSOFTWARE\Policies\Microsoft\PushToInstall' '/v' 'DisablePushToInstall' '/t' 'REG_DWORD' '/d' '1' '/f' | Out-Null
 & 'reg' 'add' 'HKLM\zSOFTWARE\Policies\Microsoft\MRT' '/v' 'DontOfferThroughWUAU' '/t' 'REG_DWORD' '/d' '1' '/f' | Out-Null
@@ -579,7 +596,6 @@ Write-Host "Prevents installation or DevHome and Outlook:"
 & 'reg' 'delete' 'HKLM\zSOFTWARE\Microsoft\WindowsUpdate\Orchestrator\UScheduler_Oobe\DevHomeUpdate' '/f' | Out-Null
 Write-Host "Disabling Copilot"
 & 'reg' 'add' 'HKLM\zSOFTWARE\Policies\Microsoft\Windows\WindowsCopilot' '/v' 'TurnOffWindowsCopilot' '/t' 'REG_DWORD' '/d' '1' '/f' | Out-Null
-& 'reg' 'add' 'HKLM\zSOFTWARE\Policies\Microsoft\Edge' '/v' 'HubsSidebarEnabled' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
 & 'reg' 'add' 'HKLM\zSOFTWARE\Policies\Microsoft\Windows\Explorer' '/v' 'DisableSearchBoxSuggestions' '/t' 'REG_DWORD' '/d' '1' '/f' | Out-Null
 Write-Host "Prevents installation of Teams:"
 & 'reg' 'add' 'HKLM\zSOFTWARE\Policies\Microsoft\Teams' '/v' 'DisableInstallation' '/t' 'REG_DWORD' '/d' '1' '/f' | Out-Null
@@ -817,9 +833,6 @@ Write-Host "Online driver installation: Enabled (for hardware compatibility)"
 & 'reg' 'add' 'HKLM\zSOFTWARE\Microsoft\WindowsUpdate\UX\Settings' '/v' 'ActiveHoursEnd' '/t' 'REG_DWORD' '/d' '20' '/f' | Out-Null
 & 'reg' 'add' 'HKLM\zSOFTWARE\Microsoft\WindowsUpdate\UX\Settings' '/v' 'IsExpedited' '/t' 'REG_DWORD' '/d' '0' '/f' | Out-Null
 & 'reg' 'add' 'HKLM\zSOFTWARE\Microsoft\WindowsUpdate\UX\Settings' '/v' 'SmartActiveHoursState' '/t' 'REG_DWORD' '/d' '1' '/f' | Out-Null
-
-# Notify user before downloading updates
-& 'reg' 'add' 'HKLM\zSOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' '/v' 'AUOptions' '/t' 'REG_DWORD' '/d' '2' '/f' | Out-Null
 
 Write-Host "Windows Update configured: 800-day pause set from build date. Use Toolkit scripts to resume when needed."
 
